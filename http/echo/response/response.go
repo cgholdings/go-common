@@ -1,8 +1,8 @@
 package response
 
 import (
-	"github.com/bossncn/go-common/http/model"
-	"github.com/bossncn/go-common/http/model/error_code"
+	"github.com/cgholdings/go-common/http/model"
+	"github.com/cgholdings/go-common/http/model/error_code"
 	"github.com/labstack/echo/v4"
 )
 

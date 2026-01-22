@@ -139,6 +139,15 @@ func (p *Plugin) encryptFields(rv reflect.Value) error {
 	for _, fieldIndex := range encryptedFields {
 		field := rv.Field(fieldIndex)
 
+		// Handle pointer to string
+		if field.Kind() == reflect.Ptr {
+			if field.IsNil() {
+				continue
+			}
+			// Dereference the pointer
+			field = field.Elem()
+		}
+
 		// Only encrypt string fields
 		if field.Kind() != reflect.String {
 			continue
@@ -193,6 +202,15 @@ func (p *Plugin) decryptFields(rv reflect.Value) error {
 	for _, fieldIndex := range encryptedFields {
 		field := rv.Field(fieldIndex)
 
+		// Handle pointer to string
+		if field.Kind() == reflect.Ptr {
+			if field.IsNil() {
+				continue
+			}
+			// Dereference the pointer
+			field = field.Elem()
+		}
+
 		// Only decrypt string fields
 		if field.Kind() != reflect.String {
 			continue
@@ -230,8 +248,12 @@ func (p *Plugin) getEncryptedFields(t reflect.Type) []int {
 		if tag, ok := field.Tag.Lookup(EncryptTagName); ok {
 			// Accept "true", "1", "yes", or any non-empty value
 			if tag == "true" || tag == "1" || tag == "yes" || tag != "" && tag != "false" && tag != "0" && tag != "no" {
-				// Only support string fields
-				if field.Type.Kind() == reflect.String {
+				// Support string and *string (pointer to string) fields
+				fieldKind := field.Type.Kind()
+				if fieldKind == reflect.String {
+					indices = append(indices, i)
+				} else if fieldKind == reflect.Ptr && field.Type.Elem().Kind() == reflect.String {
+					// Pointer to string
 					indices = append(indices, i)
 				}
 			}
